@@ -6,7 +6,12 @@ require("dotenv").config();
 
 const app = express();
 const server = http.createServer(app);
-const io = new Server(server, { cors: { origin: "*" } });
+const io = new Server(server, {
+    cors: {
+      origin: process.env.FRONTURL, // Usa el dominio de tu frontend
+      methods: ["GET", "POST"]
+    }
+  })
 
 let connectedUsers = 0;
 let answers = [];
