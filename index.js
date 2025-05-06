@@ -12,8 +12,9 @@ let connectedUsers = 0;
 let answers = [];
 
 
+
+
 io.on("connection", (socket) => {
-    console.log("Usuario conectado");
 
     socket.on("validar", (paswword) => {
         if (paswword == process.env.PASSWORD) {
@@ -28,12 +29,17 @@ io.on("connection", (socket) => {
         io.emit("users-count", connectedUsers);
     });
 
+    socket.on("disconnect", () => {
+        connectedUsers--;
+        io.emit("users-count", connectedUsers);
+    });
+
+
     socket.on("sendAnswer", (answer) => {
         answers.push({
             answer: answer,
             votes: 0
         });
-        console.log(answers)
         io.emit("answers-count", answers.length);
     });
 
@@ -52,23 +58,15 @@ io.on("connection", (socket) => {
         answers = [];
         connectedUsers = 0;
         io.emit("resetEvent");
-        console.log("reset")
     });
 
-    socket.on("vote", (index)=>{
-        console.log("Voto recibido")
-        
-        answers[index].votes +=1;
+    socket.on("vote", (index) => {
+
+        answers[index].votes += 1;
         const count = answers[index].votes;
-        console.log("Cantidad de votos", count)
-        console.log(answers)
-        io.emit("voteUpdate", {index, count});
+        io.emit("voteUpdate", { index, count });
     })
 
-    socket.on("disconnect", () => {
-        connectedUsers--;
-        io.emit("users-count", connectedUsers);
-    });
 });
 
 server.listen(process.env.PORT, () => {
